@@ -30,7 +30,7 @@ export function Header({ onToggleSidebar, showSidebarToggle }: HeaderProps) {
             <span className="text-primary">Brew</span>
             <span style={{ color: "rgb(240, 183, 18)" }}>lytics</span>
           </h1>
-          <span className="text-[9px] md:text-[10px] text-muted-foreground font-medium tracking-widest uppercase">by Robusta</span>
+          <span className="text-[9px] md:text-[10px] text-muted-foreground font-medium tracking-widest uppercase">by Yanga</span>
         </div>
       </div>
 
