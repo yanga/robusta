@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="g4a" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="g4b" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.2" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="400" rx="32" fill="#0f0f23" />
+
+  <!-- Minimal coffee cup (bottom half) -->
+  <path d="M 120 220 L 130 310 Q 135 335 160 335 L 240 335 Q 265 335 270 310 L 280 220"
+        fill="url(#g4a)" />
+
+  <!-- Cup rim -->
+  <rect x="112" y="212" width="176" height="14" rx="7" fill="#6366f1" />
+
+  <!-- Handle -->
+  <path d="M 280 235 Q 318 235 318 268 Q 318 300 280 300"
+        fill="none" stroke="#6366f1" stroke-width="10" stroke-linecap="round" />
+
+  <!-- Steam as an upward analytics line chart -->
+  <path d="M 150 195 Q 155 170 165 175 Q 175 180 180 155 Q 185 130 195 140
+           Q 205 150 210 120 Q 215 90 225 100 Q 235 110 240 75 Q 245 50 255 55"
+        fill="none" stroke="url(#g4b)" stroke-width="4" stroke-linecap="round" />
+
+  <!-- Data points on the steam line -->
+  <circle cx="150" cy="195" r="5" fill="#f59e0b" />
+  <circle cx="180" cy="155" r="5" fill="#f59e0b" />
+  <circle cx="210" cy="120" r="5" fill="#f59e0b" />
+  <circle cx="240" cy="75" r="5" fill="#f59e0b" />
+
+  <!-- Second steam line (subtle) -->
+  <path d="M 170 195 Q 175 175 180 180 Q 188 185 192 165 Q 196 145 205 155"
+        fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" opacity="0.4" />
+
+  <!-- Small plus/sparkle accent -->
+  <g transform="translate(260, 50)" opacity="0.6">
+    <line x1="0" y1="-8" x2="0" y2="8" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" />
+    <line x1="-8" y1="0" x2="8" y2="0" stroke="#f59e0b" stroke-width="2" stroke-linecap="round" />
+  </g>
+  <g transform="translate(140, 80)" opacity="0.4">
+    <line x1="0" y1="-5" x2="0" y2="5" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" />
+    <line x1="-5" y1="0" x2="5" y2="0" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" />
+  </g>
+
+  <!-- Wordmark -->
+  <text x="200" y="380" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif"
+        font-size="30" font-weight="800" fill="white" letter-spacing="4">BREWLYTICS</text>
+</svg>

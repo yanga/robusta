@@ -1,0 +1,20 @@
+{
+  "name": "datachat",
+  "private": true,
+  "workspaces": [
+    "packages/shared-types",
+    "packages/backend",
+    "packages/frontend"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev -w packages/backend",
+    "dev:frontend": "npm run dev -w packages/frontend",
+    "build": "npm run build -w packages/shared-types && npm run build -w packages/backend && npm run build -w packages/frontend",
+    "start": "NODE_ENV=production node packages/backend/dist/index.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.7.3"
+  }
+}

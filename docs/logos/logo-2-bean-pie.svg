@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="g2a" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4f46e5;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="400" height="400" rx="40" fill="#0f0f23" />
+
+  <!-- Coffee bean shape as pie chart -->
+  <!-- Bean outline -->
+  <ellipse cx="200" cy="180" rx="110" ry="130" fill="none" stroke="#2d2d4e" stroke-width="2" />
+
+  <!-- Pie slice 1 (large) - 40% -->
+  <path d="M 200 180 L 200 50 A 110 130 0 0 1 295 120 Z" fill="#6366f1" />
+
+  <!-- Pie slice 2 - 25% -->
+  <path d="M 200 180 L 295 120 A 110 130 0 0 1 280 280 Z" fill="#8b5cf6" />
+
+  <!-- Pie slice 3 - 20% -->
+  <path d="M 200 180 L 280 280 A 110 130 0 0 1 130 280 Z" fill="#a78bfa" />
+
+  <!-- Pie slice 4 - 15% -->
+  <path d="M 200 180 L 130 280 A 110 130 0 0 1 200 50 Z" fill="#c4b5fd" />
+
+  <!-- Bean center line (crack) -->
+  <path d="M 200 70 Q 175 130 210 180 Q 230 220 195 290"
+        fill="none" stroke="#0f0f23" stroke-width="6" stroke-linecap="round" />
+
+  <!-- Small data dots along the crack -->
+  <circle cx="198" cy="85" r="4" fill="#f59e0b" />
+  <circle cx="188" cy="130" r="4" fill="#f59e0b" />
+  <circle cx="210" cy="180" r="4" fill="#f59e0b" />
+  <circle cx="218" cy="225" r="4" fill="#f59e0b" />
+  <circle cx="200" cy="275" r="4" fill="#f59e0b" />
+
+  <!-- Text -->
+  <text x="200" y="355" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif"
+        font-size="32" font-weight="700" fill="white" letter-spacing="3">BREWLYTICS</text>
+  <text x="200" y="378" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif"
+        font-size="11" font-weight="400" fill="#a78bfa" letter-spacing="5">BY ROBUSTA</text>
+</svg>
