@@ -10,11 +10,11 @@ interface AppState {
   sessions: Session[];
   activeSessionId: string | null;
   theme: "light" | "dark";
-  uploadProgress: number | null; // 0-100 or null when not uploading
+  uploadStatus: { phase: "uploading" | "processing"; progress: number } | null;
 
   // Actions
   addSession: (id: string, filename: string, schema: SessionSchema) => void;
-  setUploadProgress: (progress: number | null) => void;
+  setUploadStatus: (status: { phase: "uploading" | "processing"; progress: number } | null) => void;
   switchSession: (id: string) => void;
   addMessage: (sessionId: string, message: ChatMessage) => void;
   appendToLastAssistant: (sessionId: string, token: string) => void;
@@ -30,13 +30,13 @@ interface AppState {
 export const useAppStore = create<AppState>((set) => ({
   sessions: [],
   activeSessionId: null,
-  uploadProgress: null,
+  uploadStatus: null,
   theme:
     typeof window !== "undefined" && localStorage.getItem("theme") === "dark"
       ? "dark"
       : "light",
 
-  setUploadProgress: (progress) => set({ uploadProgress: progress }),
+  setUploadStatus: (status) => set({ uploadStatus: status }),
 
   addSession: (id, filename, schema) =>
     set((state) => ({

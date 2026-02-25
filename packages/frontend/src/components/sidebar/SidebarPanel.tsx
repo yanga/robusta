@@ -89,7 +89,7 @@ export function SidebarPanel({ schema, sessionId, onClose }: SidebarPanelProps) 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const setUploadProgress = useAppStore((s) => s.setUploadProgress);
+  const setUploadStatus = useAppStore((s) => s.setUploadStatus);
 
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -97,18 +97,21 @@ export function SidebarPanel({ schema, sessionId, onClose }: SidebarPanelProps) 
       if (!file) return;
       e.target.value = "";
 
-      setUploadProgress(0);
+      setUploadStatus({ phase: "uploading", progress: 0 });
       try {
-        const data = await uploadFile(file, (percent) => setUploadProgress(percent));
+        const data = await uploadFile(file, {
+          onProgress: (percent) => setUploadStatus({ phase: "uploading", progress: percent }),
+          onUploadComplete: () => setUploadStatus({ phase: "processing", progress: 100 }),
+        });
         addSession(data.sessionId, data.schema.filename, data.schema);
         toast.success(`Loaded ${data.schema.filename}`);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Upload failed");
       } finally {
-        setUploadProgress(null);
+        setUploadStatus(null);
       }
     },
-    [addSession, setUploadProgress]
+    [addSession, setUploadStatus]
   );
 
   return (

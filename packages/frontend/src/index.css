@@ -61,6 +61,16 @@
   }
 }
 
+/* Indeterminate progress bar animation */
+@keyframes indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
 /* contentEditable placeholder */
 .empty-placeholder:empty::before {
   content: attr(data-placeholder);

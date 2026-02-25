@@ -1,15 +1,38 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect, useRef } from "react";
 import { useDropzone, type FileRejection } from "react-dropzone";
 import { Upload, FileSpreadsheet, Loader2, MessageSquareText, BarChart3, Sparkles } from "lucide-react";
 import { useAppStore } from "../../stores/appStore";
 import { toast } from "sonner";
 import { uploadFile } from "../../lib/uploadFile";
 
+const PROCESSING_MESSAGES = [
+  "Loading file...",
+  "Processing data...",
+  "Analyzing columns...",
+  "Detecting types...",
+  "Almost ready...",
+];
+
 export function UploadZone() {
   const [uploading, setUploading] = useState(false);
   const addSession = useAppStore((s) => s.addSession);
-  const uploadProgress = useAppStore((s) => s.uploadProgress);
-  const setUploadProgress = useAppStore((s) => s.setUploadProgress);
+  const uploadStatus = useAppStore((s) => s.uploadStatus);
+  const setUploadStatus = useAppStore((s) => s.setUploadStatus);
+  const [processingMsgIndex, setProcessingMsgIndex] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  // Cycle through processing messages
+  useEffect(() => {
+    if (uploadStatus?.phase === "processing") {
+      setProcessingMsgIndex(0);
+      intervalRef.current = setInterval(() => {
+        setProcessingMsgIndex((i) => (i + 1) % PROCESSING_MESSAGES.length);
+      }, 2000);
+    } else {
+      clearInterval(intervalRef.current);
+    }
+    return () => clearInterval(intervalRef.current);
+  }, [uploadStatus?.phase]);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[], rejections: FileRejection[]) => {
@@ -31,20 +54,23 @@ export function UploadZone() {
       if (!file) return;
 
       setUploading(true);
-      setUploadProgress(0);
+      setUploadStatus({ phase: "uploading", progress: 0 });
 
       try {
-        const data = await uploadFile(file, (percent) => setUploadProgress(percent));
+        const data = await uploadFile(file, {
+          onProgress: (percent) => setUploadStatus({ phase: "uploading", progress: percent }),
+          onUploadComplete: () => setUploadStatus({ phase: "processing", progress: 100 }),
+        });
         addSession(data.sessionId, data.schema.filename, data.schema);
         toast.success(`Loaded ${data.schema.filename}`);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Upload failed");
       } finally {
         setUploading(false);
-        setUploadProgress(null);
+        setUploadStatus(null);
       }
     },
-    [addSession, setUploadProgress]
+    [addSession, setUploadStatus]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -118,24 +144,28 @@ export function UploadZone() {
             {uploading ? (
               <div className="flex flex-col items-center gap-3 w-full">
                 <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                <p className="text-muted-foreground">
-                  {uploadProgress !== null && uploadProgress < 100
-                    ? "Uploading your file..."
-                    : "Processing your file..."}
+                <p className="text-muted-foreground font-medium">
+                  {uploadStatus?.phase === "processing"
+                    ? PROCESSING_MESSAGES[processingMsgIndex]
+                    : "Uploading file..."}
                 </p>
-                {uploadProgress !== null && (
-                  <div className="w-full max-w-xs">
-                    <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                <div className="w-full max-w-xs">
+                  <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                    {uploadStatus?.phase === "processing" ? (
+                      <div className="h-full w-1/3 rounded-full bg-primary animate-[indeterminate_1.5s_ease-in-out_infinite]" />
+                    ) : (
                       <div
                         className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
-                        style={{ width: `${uploadProgress}%` }}
+                        style={{ width: `${uploadStatus?.progress ?? 0}%` }}
                       />
-                    </div>
-                    <p className="text-xs text-muted-foreground text-center mt-1">
-                      {uploadProgress < 100 ? `${uploadProgress}%` : "Processing..."}
-                    </p>
+                    )}
                   </div>
-                )}
+                  <p className="text-xs text-muted-foreground text-center mt-1.5">
+                    {uploadStatus?.phase === "processing"
+                      ? "Server is processing your data"
+                      : `${uploadStatus?.progress ?? 0}%`}
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">

@@ -1,8 +1,13 @@
 import type { UploadResponse } from "@datachat/shared-types";
 
+interface UploadCallbacks {
+  onProgress: (percent: number) => void;
+  onUploadComplete: () => void;
+}
+
 export function uploadFile(
   file: File,
-  onProgress: (percent: number) => void
+  callbacks: UploadCallbacks
 ): Promise<UploadResponse> {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -12,8 +17,12 @@ export function uploadFile(
     xhr.upload.addEventListener("progress", (e) => {
       if (e.lengthComputable) {
         const percent = Math.round((e.loaded / e.total) * 100);
-        onProgress(percent);
+        callbacks.onProgress(percent);
       }
+    });
+
+    xhr.upload.addEventListener("load", () => {
+      callbacks.onUploadComplete();
     });
 
     xhr.addEventListener("load", () => {
