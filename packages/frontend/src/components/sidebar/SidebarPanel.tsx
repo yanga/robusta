@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { Settings2, Table2, ChevronDown, Check, Plus, X } from "lucide-react";
 import { toast } from "sonner";
-import type { SessionSchema, UploadResponse } from "@datachat/shared-types";
+import type { SessionSchema } from "@datachat/shared-types";
 import { useAppStore } from "../../stores/appStore";
+import { uploadFile } from "../../lib/uploadFile";
 import { PropertiesTab } from "./PropertiesTab";
 import { DataTab } from "./DataTab";
 
@@ -88,30 +89,26 @@ export function SidebarPanel({ schema, sessionId, onClose }: SidebarPanelProps) 
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const setUploadProgress = useAppStore((s) => s.setUploadProgress);
+
   const handleFileChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
       e.target.value = "";
 
-      const formData = new FormData();
-      formData.append("file", file);
-
+      setUploadProgress(0);
       try {
-        const res = await fetch("/api/upload", { method: "POST", body: formData });
-        if (!res.ok) {
-          const err = await res.json();
-          toast.error(err.error || "Upload failed");
-          return;
-        }
-        const data: UploadResponse = await res.json();
+        const data = await uploadFile(file, (percent) => setUploadProgress(percent));
         addSession(data.sessionId, data.schema.filename, data.schema);
         toast.success(`Loaded ${data.schema.filename}`);
-      } catch {
-        toast.error("Upload failed");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Upload failed");
+      } finally {
+        setUploadProgress(null);
       }
     },
-    [addSession]
+    [addSession, setUploadProgress]
   );
 
   return (

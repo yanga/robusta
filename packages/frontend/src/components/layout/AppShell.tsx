@@ -8,12 +8,13 @@ import { ChatArea } from "../chat/ChatArea";
 import { InputBar } from "../chat/InputBar";
 import { Toaster, toast } from "sonner";
 import { FileSpreadsheet } from "lucide-react";
-import type { UploadResponse } from "@datachat/shared-types";
+import { uploadFile } from "../../lib/uploadFile";
 
 export function AppShell() {
   const sessions = useAppStore((s) => s.sessions);
   const activeSessionId = useAppStore((s) => s.activeSessionId);
   const addSession = useAppStore((s) => s.addSession);
+  const uploadProgress = useAppStore((s) => s.uploadProgress);
   const activeSession = sessions.find((s) => s.id === activeSessionId);
   const { sendQuery } = useSocket();
   const [dragging, setDragging] = useState(false);
@@ -41,6 +42,8 @@ export function AppShell() {
     [activeSessionId, sendQuery]
   );
 
+  const setUploadProgress = useAppStore((s) => s.setUploadProgress);
+
   const handleFileDrop = useCallback(
     async (file: File) => {
       const ext = file.name.toLowerCase().split(".").pop();
@@ -53,29 +56,18 @@ export function AppShell() {
         return;
       }
 
-      const formData = new FormData();
-      formData.append("file", file);
-
+      setUploadProgress(0);
       try {
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          toast.error(data.error || "Upload failed");
-          return;
-        }
-
-        const data: UploadResponse = await res.json();
+        const data = await uploadFile(file, (percent) => setUploadProgress(percent));
         addSession(data.sessionId, data.schema.filename, data.schema);
         toast.success(`Loaded ${data.schema.filename}`);
-      } catch {
-        toast.error("Upload failed");
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Upload failed");
+      } finally {
+        setUploadProgress(null);
       }
     },
-    [addSession]
+    [addSession, setUploadProgress]
   );
 
   const onDragEnter = useCallback((e: React.DragEvent) => {
@@ -161,6 +153,16 @@ export function AppShell() {
               columns={activeSession?.schema.columns.map((c) => c.name) || []}
             />
           </div>
+        </div>
+      )}
+
+      {/* Upload progress bar (for drag-drop / sidebar uploads) */}
+      {uploadProgress !== null && activeSession && (
+        <div className="absolute top-0 left-0 right-0 z-50 h-1 bg-secondary">
+          <div
+            className="h-full bg-primary transition-all duration-300 ease-out"
+            style={{ width: `${uploadProgress}%` }}
+          />
         </div>
       )}
 

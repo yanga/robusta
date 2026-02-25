@@ -3,11 +3,13 @@ import { useDropzone, type FileRejection } from "react-dropzone";
 import { Upload, FileSpreadsheet, Loader2, MessageSquareText, BarChart3, Sparkles } from "lucide-react";
 import { useAppStore } from "../../stores/appStore";
 import { toast } from "sonner";
-import type { UploadResponse } from "@datachat/shared-types";
+import { uploadFile } from "../../lib/uploadFile";
 
 export function UploadZone() {
   const [uploading, setUploading] = useState(false);
   const addSession = useAppStore((s) => s.addSession);
+  const uploadProgress = useAppStore((s) => s.uploadProgress);
+  const setUploadProgress = useAppStore((s) => s.setUploadProgress);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[], rejections: FileRejection[]) => {
@@ -29,31 +31,20 @@ export function UploadZone() {
       if (!file) return;
 
       setUploading(true);
+      setUploadProgress(0);
 
       try {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!res.ok) {
-          const data = await res.json();
-          throw new Error(data.error || "Upload failed");
-        }
-
-        const data: UploadResponse = await res.json();
+        const data = await uploadFile(file, (percent) => setUploadProgress(percent));
         addSession(data.sessionId, data.schema.filename, data.schema);
         toast.success(`Loaded ${data.schema.filename}`);
       } catch (err) {
         toast.error(err instanceof Error ? err.message : "Upload failed");
       } finally {
         setUploading(false);
+        setUploadProgress(null);
       }
     },
-    [addSession]
+    [addSession, setUploadProgress]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -125,9 +116,26 @@ export function UploadZone() {
             <input {...getInputProps()} onClick={(e) => { (e.target as HTMLInputElement).value = ""; }} />
 
             {uploading ? (
-              <div className="flex flex-col items-center gap-3">
+              <div className="flex flex-col items-center gap-3 w-full">
                 <Loader2 className="h-12 w-12 text-primary animate-spin" />
-                <p className="text-muted-foreground">Parsing your file...</p>
+                <p className="text-muted-foreground">
+                  {uploadProgress !== null && uploadProgress < 100
+                    ? "Uploading your file..."
+                    : "Processing your file..."}
+                </p>
+                {uploadProgress !== null && (
+                  <div className="w-full max-w-xs">
+                    <div className="h-2 rounded-full bg-secondary overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground text-center mt-1">
+                      {uploadProgress < 100 ? `${uploadProgress}%` : "Processing..."}
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3">
